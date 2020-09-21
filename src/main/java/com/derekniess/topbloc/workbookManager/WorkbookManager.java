@@ -23,7 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class WorkbookManager {	
 	private static Logger logger = LogManager.getLogger(WorkbookManager.class);
 	
-	public HashMap<String, Record> records; // Acts as in-memory storage. Could replace with Redis.
+	private HashMap<String, Record> records; // Acts as in-memory storage. Could replace with Redis.
 	public Extractor extractor;
 	public Aggregator aggregator;
 	
