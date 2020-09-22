@@ -1,6 +1,12 @@
 package com.derekniess.topbloc.workbookManager;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +20,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
+
 
 /**
  * A class for sending challenge results to a TopBloc server for evaluation.
@@ -55,16 +62,16 @@ public class MainLauncher {
     	
     	try {
     	    HttpPost httpPost = new HttpPost("https://postman-echo.com/post"); 
-
     	    StringBuilder jsonBuilder = new StringBuilder();
+    	    Gson gson = new GsonBuilder().create();
     	    jsonBuilder.append("{\"id\": \"dniess2@illinois.edu\", ");
     	    jsonBuilder.append( "\"name\": \"Derek Niess\", ");
-    	    jsonBuilder.append( String.format("\"average\": %d, ", (int)average));
-    	    jsonBuilder.append( String.format("\"studentIds\": %s}", studentIDs.toString()));
+    	    jsonBuilder.append(String.format("\"average\": %d, ", (int)average));
+    	    jsonBuilder.append(String.format("\"studentIds\": %s}", gson.toJson(studentIDs)));
     	    String payload = jsonBuilder.toString();
     	    logger.info("JSON payload to be sent: " + payload);
     	    
-    	    StringEntity entity = new StringEntity(payload.toString());
+    	    StringEntity entity = new StringEntity(payload);
     	    httpPost.setEntity(entity);
     	    httpPost.setHeader("Accept", "application/json");
     	    httpPost.setHeader("Content-type", "application/json");
@@ -75,8 +82,15 @@ public class MainLauncher {
     	    else
     	    	logger.error("POST failed with status code: " + response.getStatusLine().getStatusCode());
     	    
-    	    logger.info(response.toString());
+    	    InputStream content = response.getEntity().getContent();
     	    
+    	    StringBuilder encodedContent = new StringBuilder();
+    	    try (Reader reader = new InputStreamReader(content, "US-ASCII")) {
+    	    	int charVal;
+    	    	while ((charVal = reader.read()) != -1)
+    	    		encodedContent.append((char) charVal);
+    	    }
+    	    logger.info("Content response: " + encodedContent.toString());
     	} catch (Exception e) {
     		logger.error(e);
     	} finally {
